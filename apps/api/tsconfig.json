@@ -1,0 +1,16 @@
+{
+  "extends": "@huellitas/config/tsconfig.base.json",
+  "compilerOptions": {
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "removeComments": true,
+    "strictPropertyInitialization": false,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "incremental": true,
+    "types": ["vitest/globals", "node"]
+  },
+  "include": ["src", "test", "prisma", "prisma.config.ts", "vitest.config*.ts"]
+}

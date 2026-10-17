@@ -1,0 +1,14 @@
+# Alternativa a Postgres nativo: docker compose -f docker/compose.dev.yml up -d
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: huellitas
+      POSTGRES_PASSWORD: huellitas
+      POSTGRES_DB: huellitas
+    ports:
+      - '5432:5432'
+    volumes:
+      - huellitas-db:/var/lib/postgresql
+volumes:
+  huellitas-db:

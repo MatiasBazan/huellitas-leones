@@ -1,0 +1,364 @@
+// Huellita Leones — modelo de datos
+// Convenciones:
+// - IDs UUIDv7 (ordenables por tiempo) como uuid nativo de Postgres.
+// - La ciudad es un dato: User y Post apuntan a City. Nada hardcodeado.
+// - Borrado lógico (deletedAt) en User, Pet y Post.
+// - Lo que se filtra en el feed se copia en Post (species, sex, size, color).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ───────── ENUMS ─────────
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+
+enum Species {
+  PERRO
+  GATO
+  OTRO
+}
+
+enum Sex {
+  MACHO
+  HEMBRA
+  DESCONOCIDO
+}
+
+enum PetSize {
+  CHICO
+  MEDIANO
+  GRANDE
+}
+
+enum PetStatus {
+  EN_CASA
+  PERDIDA
+}
+
+enum PostType {
+  PERDIDA
+  ENCONTRADA
+  ADOPCION
+}
+
+enum PostStatus {
+  ACTIVA
+  RESUELTA
+  OCULTA
+}
+
+enum Resolution {
+  REENCONTRADA
+  ADOPTADA
+  OTRO
+}
+
+/// PENDING = presign emitido, todavía no se confirmó la subida a R2
+enum MediaStatus {
+  PENDING
+  READY
+}
+
+enum Platform {
+  ANDROID
+  IOS
+  WEB
+}
+
+enum ReportReason {
+  SPAM
+  FALSA
+  VENTA
+  MALTRATO
+  INAPROPIADA
+  OTRO
+}
+
+enum ReportStatus {
+  PENDIENTE
+  RESUELTO
+  DESCARTADO
+}
+
+enum ModerationActionType {
+  HIDE_POST
+  UNHIDE_POST
+  BLOCK_USER
+  UNBLOCK_USER
+  DISMISS_REPORT
+}
+
+// ───────── GEOGRAFÍA ─────────
+
+model City {
+  id            String         @id @default(uuid(7)) @db.Uuid
+  /// identificador estable para URLs y config: "leones-cba"
+  slug          String         @unique
+  name          String
+  province      String
+  country       String         @default("AR")
+  lat           Float?
+  lng           Float?
+  isActive      Boolean        @default(true)
+  neighborhoods Neighborhood[]
+  users         User[]
+  posts         Post[]
+  createdAt     DateTime       @default(now())
+}
+
+model Neighborhood {
+  id     String @id @default(uuid(7)) @db.Uuid
+  cityId String @db.Uuid
+  city   City   @relation(fields: [cityId], references: [id])
+  name   String
+  users  User[]
+  posts  Post[]
+
+  @@unique([cityId, name])
+}
+
+// ───────── USUARIOS / AUTH ─────────
+
+model User {
+  id              String        @id @default(uuid(7)) @db.Uuid
+  /// siempre en minúsculas
+  email           String        @unique
+  emailVerifiedAt DateTime?
+  /// null si la cuenta solo usa Google
+  passwordHash    String?
+  googleId        String?       @unique
+  name            String
+  avatarUrl       String?
+  /// E.164 móvil argentino: +549XXXXXXXXXX
+  whatsapp        String?
+  cityId          String        @db.Uuid
+  city            City          @relation(fields: [cityId], references: [id])
+  neighborhoodId  String?       @db.Uuid
+  neighborhood    Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+  role            Role          @default(USER)
+  status          UserStatus    @default(ACTIVE)
+  blockedReason   String?
+  /// opt-out del push de mascotas perdidas
+  notifyLostPets  Boolean       @default(true)
+
+  pets              Pet[]
+  posts             Post[]
+  media             Media[]
+  refreshTokens     RefreshToken[]
+  pushTokens        PushToken[]
+  reportsMade       Report[]           @relation("Reporter")
+  reportsResolved   Report[]           @relation("ReportResolver")
+  moderationActions ModerationAction[] @relation("ModerationAdmin")
+  moderationTargets ModerationAction[] @relation("ModerationTargetUser")
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@index([cityId, status])
+}
+
+/// Refresh token con rotación. Se guarda el hash, nunca el token.
+/// Si se reusa un token ya revocado se revoca toda la familia (posible robo).
+model RefreshToken {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  userId    String    @db.Uuid
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  familyId  String    @db.Uuid
+  userAgent String?
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@index([familyId])
+}
+
+model PushToken {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  userId     String   @db.Uuid
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// ExponentPushToken[...]
+  token      String   @unique
+  platform   Platform
+  lastSeenAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ───────── MASCOTAS ─────────
+
+model Pet {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  ownerId          String    @db.Uuid
+  owner            User      @relation(fields: [ownerId], references: [id])
+  name             String
+  species          Species
+  /// texto libre ("mestizo", "caniche")
+  breed            String?
+  color            String
+  sex              Sex       @default(DESCONOCIDO)
+  size             PetSize?
+  /// la edad se calcula a partir de acá, así no queda desactualizada
+  approxBirthDate  DateTime? @db.Date
+  distinctiveMarks String?
+  status           PetStatus @default(EN_CASA)
+  /// reservado para el QR de collar (post-MVP)
+  publicCode       String?   @unique
+  photos           Media[]
+  posts            Post[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  deletedAt        DateTime?
+
+  @@index([ownerId])
+}
+
+// ───────── PUBLICACIONES ─────────
+
+model Post {
+  id             String        @id @default(uuid(7)) @db.Uuid
+  /// nanoid corto para la URL pública: /p/Ab3xK9pQ
+  shortId        String        @unique
+  type           PostType
+  status         PostStatus    @default(ACTIVA)
+  authorId       String        @db.Uuid
+  author         User          @relation(fields: [authorId], references: [id])
+  /// obligatorio para PERDIDA (lo valida el service)
+  petId          String?       @db.Uuid
+  pet            Pet?          @relation(fields: [petId], references: [id])
+  cityId         String        @db.Uuid
+  city           City          @relation(fields: [cityId], references: [id])
+  neighborhoodId String?       @db.Uuid
+  neighborhood   Neighborhood? @relation(fields: [neighborhoodId], references: [id])
+  /// "cerca de la plaza San Martín"
+  zoneText       String?
+  /// aproximado, nunca la dirección exacta. Post-MVP: columna geography (PostGIS)
+  lat            Float?
+  lng            Float?
+  /// cuándo se perdió/encontró; en ADOPCION = fecha de publicación
+  eventDate      DateTime
+  title          String?
+  description    String
+  // Copiados de la mascota en PERDIDA; cargados a mano en ENCONTRADA/ADOPCION
+  species        Species
+  sex            Sex           @default(DESCONOCIDO)
+  size           PetSize?
+  color          String?
+  /// mostrar el WhatsApp del autor en web/flyer
+  showPhone      Boolean       @default(true)
+  resolution     Resolution?
+  resolvedAt     DateTime?
+  hiddenReason   String?
+  /// idempotencia del push de PERDIDA
+  pushSentAt     DateTime?
+  /// fotos propias; en PERDIDA también se muestran las del Pet
+  photos         Media[]
+  adoption       AdoptionDetails?
+  reports        Report[]
+  moderationActions ModerationAction[]
+  publishedAt    DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  deletedAt      DateTime?
+
+  // Feed: ciudad + estado, ordenado por fecha (cursor = publishedAt + id)
+  @@index([cityId, status, publishedAt(sort: Desc), id(sort: Desc)])
+  @@index([cityId, status, type, publishedAt(sort: Desc)])
+  @@index([cityId, status, species])
+  @@index([neighborhoodId])
+  @@index([authorId])
+  @@index([petId])
+}
+
+/// 1:1, solo para ADOPCION
+model AdoptionDetails {
+  postId          String   @id @db.Uuid
+  post            Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  approxAgeMonths Int?
+  neutered        Boolean?
+  vaccinated      Boolean?
+  dewormed        Boolean?
+  requirements    String?
+}
+
+// ───────── MEDIA (Cloudflare R2) ─────────
+
+model Media {
+  id         String      @id @default(uuid(7)) @db.Uuid
+  /// key del objeto en R2: cities/{citySlug}/{uuid}.webp
+  key        String      @unique
+  mimeType   String
+  sizeBytes  Int
+  width      Int?
+  height     Int?
+  status     MediaStatus @default(PENDING)
+  uploaderId String      @db.Uuid
+  uploader   User        @relation(fields: [uploaderId], references: [id])
+  petId      String?     @db.Uuid
+  pet        Pet?        @relation(fields: [petId], references: [id])
+  postId     String?     @db.Uuid
+  post       Post?       @relation(fields: [postId], references: [id])
+  position   Int         @default(0)
+  createdAt  DateTime    @default(now())
+
+  @@index([petId, position])
+  @@index([postId, position])
+  /// limpieza de huérfanos (PENDING viejos)
+  @@index([status, createdAt])
+}
+
+// ───────── MODERACIÓN ─────────
+
+model Report {
+  id           String       @id @default(uuid(7)) @db.Uuid
+  postId       String       @db.Uuid
+  post         Post         @relation(fields: [postId], references: [id])
+  reporterId   String       @db.Uuid
+  reporter     User         @relation("Reporter", fields: [reporterId], references: [id])
+  reason       ReportReason
+  comment      String?
+  status       ReportStatus @default(PENDIENTE)
+  resolvedById String?      @db.Uuid
+  resolvedBy   User?        @relation("ReportResolver", fields: [resolvedById], references: [id])
+  resolvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+
+  /// un reporte por usuario por publicación
+  @@unique([postId, reporterId])
+  @@index([status, createdAt])
+}
+
+/// Auditoría de acciones de admins
+model ModerationAction {
+  id           String               @id @default(uuid(7)) @db.Uuid
+  adminId      String               @db.Uuid
+  admin        User                 @relation("ModerationAdmin", fields: [adminId], references: [id])
+  type         ModerationActionType
+  targetPostId String?              @db.Uuid
+  targetPost   Post?                @relation(fields: [targetPostId], references: [id])
+  targetUserId String?              @db.Uuid
+  targetUser   User?                @relation("ModerationTargetUser", fields: [targetUserId], references: [id])
+  reportId     String?              @db.Uuid
+  reason       String?
+  createdAt    DateTime             @default(now())
+
+  @@index([targetPostId])
+  @@index([targetUserId])
+  @@index([createdAt])
+}
