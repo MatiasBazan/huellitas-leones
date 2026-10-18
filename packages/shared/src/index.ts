@@ -5,6 +5,8 @@ export * from './schemas/users.js';
 export * from './schemas/media.js';
 export * from './schemas/pets.js';
 export * from './pets.js';
+export * from './schemas/posts.js';
+export * from './posts.js';
 
 export type ApiError = {
   statusCode: number;

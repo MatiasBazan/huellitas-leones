@@ -12,6 +12,11 @@ export const LIMITS = {
   PET_NAME_MAX: 40,
   PET_TEXT_MAX: 60,
   PET_MARKS_MAX: 500,
+  ZONE_MAX: 120,
+  DESCRIPTION_MIN: 10,
+  REQUIREMENTS_MAX: 1000,
+  /** Hasta cuántos días atrás se puede fechar una pérdida o hallazgo */
+  EVENT_MAX_DAYS_AGO: 365,
 } as const;
 
 export const MEDIA = {

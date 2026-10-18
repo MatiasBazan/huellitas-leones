@@ -24,7 +24,14 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.crema },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: tabIcon('home') }} />
+      <Tabs.Screen
+        name="index"
+        options={{ title: 'Inicio', headerShown: false, tabBarIcon: tabIcon('home') }}
+      />
+      <Tabs.Screen
+        name="publish"
+        options={{ title: 'Publicar', tabBarIcon: tabIcon('add-circle') }}
+      />
       <Tabs.Screen name="pets" options={{ title: 'Mis mascotas', tabBarIcon: tabIcon('paw') }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil', tabBarIcon: tabIcon('person') }} />
     </Tabs>

@@ -37,7 +37,8 @@ export const whatsappSchema = z
 export const updateMeSchema = z
   .object({
     name: z.string().trim().min(2).max(LIMITS.NAME_MAX),
-    avatarUrl: z.url().nullable(),
+    /** Foto ya confirmada con POST /media/:id/confirm; null la saca */
+    avatarMediaId: z.uuid().nullable(),
     neighborhoodId: z.uuid().nullable(),
     whatsapp: whatsappSchema.nullable(),
     notifyLostPets: z.boolean(),

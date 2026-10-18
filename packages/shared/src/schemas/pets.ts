@@ -59,6 +59,8 @@ export type PetResponse = {
   distinctiveMarks: string | null;
   status: PetStatus;
   photos: MediaResponse[];
+  /** La publicación PERDIDA activa, si la hay */
+  activeLostPost: { id: string; shortId: string } | null;
   createdAt: string;
   updatedAt: string;
 };

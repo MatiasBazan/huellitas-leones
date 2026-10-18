@@ -13,6 +13,8 @@ import type { Media, Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { StorageService } from '../storage/storage.service.js';
 
+export type PhotoTarget = { petId: string } | { postId: string };
+
 const EXTENSIONS: Record<PresignMediaInput['contentType'], string> = {
   'image/webp': 'webp',
   'image/jpeg': 'jpg',
@@ -72,7 +74,7 @@ export class MediaService {
   /** Solo fotos sueltas; las de una mascota se sacan editando la mascota */
   async remove(userId: string, mediaId: string): Promise<void> {
     const media = await this.findOwned(userId, mediaId);
-    if (media.petId || media.postId) {
+    if (media.petId || media.postId || (await this.isAvatar(media.id))) {
       throw new ConflictException('La foto está en uso: sacala desde la mascota o la publicación');
     }
     await this.prisma.media.delete({ where: { id: media.id } });
@@ -80,23 +82,24 @@ export class MediaService {
   }
 
   /**
-   * Deja en la mascota exactamente `mediaIds`, en ese orden. Devuelve los keys de las fotos
-   * que salieron, para borrarlas del bucket después de que confirme la transacción.
+   * Deja en la mascota o publicación exactamente `mediaIds`, en ese orden. Devuelve los keys
+   * de las fotos que salieron, para borrarlas del bucket después de que confirme la transacción.
    */
-  async setPetPhotos(
+  async setPhotos(
     tx: Prisma.TransactionClient,
     userId: string,
-    petId: string,
+    target: PhotoTarget,
     mediaIds: string[],
   ): Promise<string[]> {
+    const owner = 'petId' in target ? { petId: target.petId } : { postId: target.postId };
     if (mediaIds.length) {
       const usable = await tx.media.findMany({
         where: {
           id: { in: mediaIds },
           uploaderId: userId,
           status: 'READY',
-          postId: null,
-          OR: [{ petId: null }, { petId }],
+          avatarOf: null,
+          OR: [{ petId: null, postId: null }, owner],
         },
         select: { id: true },
       });
@@ -106,16 +109,34 @@ export class MediaService {
     }
 
     const removed = await tx.media.findMany({
-      where: { petId, id: { notIn: mediaIds } },
+      where: { ...owner, id: { notIn: mediaIds } },
       select: { id: true, key: true },
     });
     if (removed.length) {
       await tx.media.deleteMany({ where: { id: { in: removed.map((m) => m.id) } } });
     }
     await Promise.all(
-      mediaIds.map((id, position) => tx.media.update({ where: { id }, data: { petId, position } })),
+      mediaIds.map((id, position) =>
+        tx.media.update({ where: { id }, data: { ...owner, position } }),
+      ),
     );
     return removed.map((m) => m.key);
+  }
+
+  /** Una foto confirmada, del usuario y sin usar: para avatar */
+  async assertFree(userId: string, mediaId: string): Promise<void> {
+    const media = await this.prisma.media.findFirst({
+      where: {
+        id: mediaId,
+        uploaderId: userId,
+        status: 'READY',
+        petId: null,
+        postId: null,
+        avatarOf: null,
+      },
+      select: { id: true },
+    });
+    if (!media) throw new BadRequestException('La foto no existe o no terminó de subirse');
   }
 
   /** Borra del bucket sin cortar el request si falla: lo que quede lo levanta la limpieza */
@@ -142,6 +163,7 @@ export class MediaService {
       where: {
         petId: null,
         postId: null,
+        avatarOf: null,
         OR: [
           { status: 'PENDING', createdAt: { lt: new Date(now.getTime() - PENDING_TTL_MS) } },
           { status: 'READY', createdAt: { lt: new Date(now.getTime() - UNATTACHED_TTL_MS) } },
@@ -156,6 +178,10 @@ export class MediaService {
     await this.prisma.media.deleteMany({ where: { id: { in: orphans.map((m) => m.id) } } });
     this.logger.log(`Limpieza: ${orphans.length} fotos huérfanas borradas`);
     return orphans.length;
+  }
+
+  private async isAvatar(mediaId: string): Promise<boolean> {
+    return (await this.prisma.user.count({ where: { avatarMediaId: mediaId } })) > 0;
   }
 
   private async findOwned(userId: string, mediaId: string): Promise<Media> {

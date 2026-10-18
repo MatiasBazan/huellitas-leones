@@ -22,6 +22,8 @@ export const envSchema = z.object({
   GOOGLE_CLIENT_IDS: csv,
   CORS_ORIGINS: csv,
   DEFAULT_CITY_SLUG: z.string().default(DEFAULT_CITY_SLUG),
+  /** URL pública de la web: links compartidos y mensaje de WhatsApp */
+  PUBLIC_WEB_URL: z.url().default('http://localhost:3101'),
   /** local = disco de la máquina (desarrollo); r2 = Cloudflare R2 */
   STORAGE_DRIVER: z.enum(['local', 'r2']).default('local'),
   STORAGE_LOCAL_DIR: z.string().default('./storage'),

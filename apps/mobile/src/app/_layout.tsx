@@ -74,6 +74,28 @@ export default function RootLayout() {
             name="pets/[id]/edit"
             options={{ ...withHeader, title: 'Editar mascota' }}
           />
+          <Stack.Screen
+            name="pets/[id]/report-lost"
+            options={{ ...withHeader, title: 'Se perdió' }}
+          />
+          <Stack.Screen
+            name="publish/lost"
+            options={{ ...withHeader, title: 'Se perdió mi mascota' }}
+          />
+          <Stack.Screen
+            name="publish/found"
+            options={{ ...withHeader, title: 'Encontré una mascota' }}
+          />
+          <Stack.Screen
+            name="publish/adoption"
+            options={{ ...withHeader, title: 'Dar en adopción' }}
+          />
+          <Stack.Screen name="post/[shortId]/index" options={{ ...withHeader, title: '' }} />
+          <Stack.Screen
+            name="post/[shortId]/edit"
+            options={{ ...withHeader, title: 'Editar publicación' }}
+          />
+          <Stack.Screen name="profile-edit" options={{ ...withHeader, title: 'Editar perfil' }} />
         </Stack.Protected>
       </Stack>
     </QueryClientProvider>

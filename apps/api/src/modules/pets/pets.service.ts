@@ -9,6 +9,11 @@ const petInclude = {
     orderBy: { position: 'asc' },
     select: { id: true, key: true, width: true, height: true },
   },
+  posts: {
+    where: { type: 'PERDIDA', status: 'ACTIVA', deletedAt: null },
+    select: { id: true, shortId: true },
+    take: 1,
+  },
 } satisfies Prisma.PetInclude;
 
 type PetWithPhotos = Prisma.PetGetPayload<{ include: typeof petInclude }>;
@@ -41,7 +46,7 @@ export class PetsService {
       const pet = await tx.pet.create({
         data: { ...fields, approxBirthDate: toDate(approxBirthDate), ownerId: userId },
       });
-      await this.media.setPetPhotos(tx, userId, pet.id, mediaIds);
+      await this.media.setPhotos(tx, userId, { petId: pet.id }, mediaIds);
       return pet.id;
     });
     return this.get(userId, petId);
@@ -55,7 +60,7 @@ export class PetsService {
         where: { id: petId },
         data: { ...fields, approxBirthDate: toDate(approxBirthDate) },
       });
-      return mediaIds ? this.media.setPetPhotos(tx, userId, petId, mediaIds) : [];
+      return mediaIds ? this.media.setPhotos(tx, userId, { petId }, mediaIds) : [];
     });
     await this.media.deleteObjectsQuietly(removedKeys);
     return this.get(userId, petId);
@@ -89,6 +94,7 @@ export class PetsService {
       distinctiveMarks: pet.distinctiveMarks,
       status: pet.status,
       photos: pet.photos.map((m) => this.media.toResponse(m)),
+      activeLostPost: pet.posts[0] ?? null,
       createdAt: pet.createdAt.toISOString(),
       updatedAt: pet.updatedAt.toISOString(),
     };

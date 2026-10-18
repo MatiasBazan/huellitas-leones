@@ -1,7 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Image } from 'expo-image';
-import { ActivityIndicator, Alert, Platform, Pressable, View } from 'react-native';
+import { useState } from 'react';
+import { ActivityIndicator, Alert, Pressable, View } from 'react-native';
 import { LIMITS } from '@huellitas/shared';
+import { ActionSheet, type SheetOption } from '@/components/action-sheet';
 import { Text } from '@/components/ui';
 import { mediaUrl } from '@/lib/config';
 import { PermissionDeniedError, pickPhotos, type PhotoSource } from '@/lib/images';
@@ -12,8 +14,17 @@ function thumbUri(item: PhotoItem): string {
   return item.local?.uri ?? (item.status === 'ready' ? mediaUrl(item.media.url) : '');
 }
 
-export function PhotoPicker({ uploads }: { uploads: PhotoUploads }) {
-  const free = LIMITS.PHOTOS_PER_PET - uploads.items.length;
+export function PhotoPicker({
+  uploads,
+  max = LIMITS.PHOTOS_PER_PET,
+  hint = 'Que se vea bien la cara y el cuerpo entero. La primera es la portada.',
+}: {
+  uploads: PhotoUploads;
+  max?: number;
+  hint?: string;
+}) {
+  const free = max - uploads.items.length;
+  const [sheet, setSheet] = useState<{ title: string; options: SheetOption[] } | null>(null);
 
   async function pick(source: PhotoSource) {
     try {
@@ -26,32 +37,40 @@ export function PhotoPicker({ uploads }: { uploads: PhotoUploads }) {
   }
 
   function chooseSource() {
-    // En la previsualización web Alert no muestra opciones: va directo al selector de archivos
-    if (Platform.OS === 'web') return void pick('library');
-    Alert.alert('Agregar fotos', undefined, [
-      { text: 'Sacar una foto', onPress: () => void pick('camera') },
-      { text: 'Elegir de la galería', onPress: () => void pick('library') },
-      { text: 'Cancelar', style: 'cancel' },
-    ]);
+    setSheet({
+      title: 'Agregar fotos',
+      options: [
+        { label: 'Sacar una foto', onPress: () => void pick('camera') },
+        { label: 'Elegir de la galería', onPress: () => void pick('library') },
+      ],
+    });
   }
 
   function itemActions(item: PhotoItem, index: number) {
-    Alert.alert('Foto', undefined, [
-      ...(item.status === 'error'
-        ? [{ text: 'Reintentar subida', onPress: () => uploads.retry(item.key) }]
-        : []),
-      ...(index > 0
-        ? [{ text: 'Usar de portada', onPress: () => uploads.makeCover(item.key) }]
-        : []),
-      { text: 'Quitar', style: 'destructive' as const, onPress: () => uploads.remove(item.key) },
-      { text: 'Cancelar', style: 'cancel' as const },
-    ]);
+    setSheet({
+      title: 'Foto',
+      options: [
+        ...(item.status === 'error'
+          ? [{ label: 'Reintentar subida', onPress: () => uploads.retry(item.key) }]
+          : []),
+        ...(index > 0
+          ? [{ label: 'Usar de portada', onPress: () => uploads.makeCover(item.key) }]
+          : []),
+        { label: 'Quitar', destructive: true, onPress: () => uploads.remove(item.key) },
+      ],
+    });
   }
 
   return (
     <View className="gap-1.5">
+      <ActionSheet
+        visible={!!sheet}
+        title={sheet?.title}
+        options={sheet?.options ?? []}
+        onClose={() => setSheet(null)}
+      />
       <Text variant="semibold" className="text-sm text-ink">
-        Fotos ({uploads.items.length}/{LIMITS.PHOTOS_PER_PET})
+        Fotos ({uploads.items.length}/{max})
       </Text>
       <View className="flex-row flex-wrap gap-2">
         {uploads.items.map((item, index) => (
@@ -100,9 +119,7 @@ export function PhotoPicker({ uploads }: { uploads: PhotoUploads }) {
           Alguna foto no se pudo subir. Tocala para reintentar.
         </Text>
       ) : (
-        <Text className="text-xs text-ink-muted">
-          Que se vea bien la cara y el cuerpo entero. La primera es la portada.
-        </Text>
+        <Text className="text-xs text-ink-muted">{hint}</Text>
       )}
     </View>
   );

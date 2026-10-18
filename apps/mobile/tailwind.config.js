@@ -3,6 +3,8 @@
 module.exports = {
   content: ['./src/**/*.{js,jsx,ts,tsx}'],
   presets: [require('nativewind/preset')],
+  // La app es solo clara (userInterfaceStyle: 'light'); con 'media' NativeWind falla en web
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {

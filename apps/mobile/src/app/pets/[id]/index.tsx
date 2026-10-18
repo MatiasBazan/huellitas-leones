@@ -1,77 +1,13 @@
-import { Image } from 'expo-image';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  useWindowDimensions,
-  View,
-  type NativeScrollEvent,
-  type NativeSyntheticEvent,
-} from 'react-native';
-import {
-  ageLabel,
-  SEX_LABEL,
-  SIZE_LABEL,
-  SPECIES_LABEL,
-  type PetResponse,
-} from '@huellitas/shared';
-import { LogoSymbol } from '@/components/logo';
+import { ActivityIndicator, ScrollView, View } from 'react-native';
+import { ageLabel, SEX_LABEL, SIZE_LABEL, SPECIES_LABEL } from '@huellitas/shared';
+import { Gallery } from '@/components/gallery';
 import { Button, FormError, Text } from '@/components/ui';
 import { errorMessage } from '@/features/auth/errors';
 import { useDeletePet, usePet } from '@/features/pets/hooks';
 import { PetStatusBadge } from '@/features/pets/pet-card';
-import { mediaUrl } from '@/lib/config';
+import { confirmAction } from '@/lib/dialogs';
 import { colors } from '@/theme';
-
-function Gallery({ pet }: { pet: PetResponse }) {
-  const { width } = useWindowDimensions();
-  const [index, setIndex] = useState(0);
-  const height = Math.round(width * 0.85);
-
-  if (!pet.photos.length) {
-    return (
-      <View style={{ height: height * 0.6 }} className="items-center justify-center bg-brand-200">
-        <LogoSymbol size={110} />
-      </View>
-    );
-  }
-
-  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
-    setIndex(Math.round(e.nativeEvent.contentOffset.x / width));
-
-  return (
-    <View>
-      <ScrollView
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onMomentumScrollEnd={onScroll}
-      >
-        {pet.photos.map((photo, i) => (
-          <Image
-            key={photo.id}
-            source={{ uri: mediaUrl(photo.url) }}
-            style={{ width, height }}
-            contentFit="cover"
-            accessibilityLabel={`Foto ${i + 1} de ${pet.name}`}
-          />
-        ))}
-      </ScrollView>
-      {pet.photos.length > 1 ? (
-        <View className="absolute bottom-3 w-full flex-row justify-center gap-1.5">
-          {pet.photos.map((p, i) => (
-            <View
-              key={p.id}
-              className={`h-2 rounded-full ${i === index ? 'w-5 bg-white' : 'w-2 bg-white/60'}`}
-            />
-          ))}
-        </View>
-      ) : null}
-    </View>
-  );
-}
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -103,21 +39,20 @@ export default function PetDetailScreen() {
 
   const p = pet.data;
 
-  function confirmDelete() {
-    Alert.alert(`¿Eliminar a ${p.name}?`, 'Se borra de tus mascotas. No se puede deshacer.', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Eliminar',
-        style: 'destructive',
-        onPress: () => remove.mutate(p.id, { onSuccess: () => router.back() }),
-      },
-    ]);
+  async function confirmDelete() {
+    const ok = await confirmAction({
+      title: `¿Eliminar a ${p.name}?`,
+      message: 'Se borra de tus mascotas. No se puede deshacer.',
+      confirmLabel: 'Eliminar',
+      destructive: true,
+    });
+    if (ok) remove.mutate(p.id, { onSuccess: () => router.back() });
   }
 
   return (
     <ScrollView className="flex-1 bg-brand-50" contentContainerClassName="pb-10">
       <Stack.Screen options={{ title: p.name }} />
-      <Gallery pet={p} />
+      <Gallery photos={p.photos} label={p.name} />
       <View className="gap-5 px-5 pt-5">
         <View className="gap-2">
           <PetStatusBadge status={p.status} />
@@ -125,6 +60,25 @@ export default function PetDetailScreen() {
             {p.name}
           </Text>
         </View>
+
+        {p.activeLostPost ? (
+          <Button
+            title="Ver la publicación de búsqueda"
+            onPress={() =>
+              router.push({
+                pathname: '/post/[shortId]',
+                params: { shortId: p.activeLostPost!.shortId },
+              })
+            }
+          />
+        ) : (
+          <Button
+            title={`Se perdió ${p.name}`}
+            onPress={() =>
+              router.push({ pathname: '/pets/[id]/report-lost', params: { id: p.id } })
+            }
+          />
+        )}
 
         <View className="flex-row flex-wrap gap-2">
           <Fact label="Especie" value={SPECIES_LABEL[p.species]} />
@@ -155,7 +109,7 @@ export default function PetDetailScreen() {
             title="Eliminar"
             variant="ghost"
             loading={remove.isPending}
-            onPress={confirmDelete}
+            onPress={() => void confirmDelete()}
           />
         </View>
       </View>

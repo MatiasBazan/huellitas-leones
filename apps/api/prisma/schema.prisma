@@ -143,7 +143,10 @@ model User {
   passwordHash    String?
   googleId        String?       @unique
   name            String
+  /// foto de Google; la subida por el usuario (avatarMedia) tiene prioridad
   avatarUrl       String?
+  avatarMediaId   String?       @unique @db.Uuid
+  avatarMedia     Media?        @relation("UserAvatar", fields: [avatarMediaId], references: [id], onDelete: SetNull)
   /// E.164 móvil argentino: +549XXXXXXXXXX
   whatsapp        String?
   cityId          String        @db.Uuid
@@ -315,6 +318,7 @@ model Media {
   postId     String?     @db.Uuid
   post       Post?       @relation(fields: [postId], references: [id])
   position   Int         @default(0)
+  avatarOf   User?       @relation("UserAvatar")
   createdAt  DateTime    @default(now())
 
   @@index([petId, position])

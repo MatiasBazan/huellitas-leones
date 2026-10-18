@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Link } from 'expo-router';
+import { Link, type Href } from 'expo-router';
 import { Pressable, View } from 'react-native';
 import { ageLabel, SPECIES_LABEL, type PetResponse } from '@huellitas/shared';
 import { LogoSymbol } from '@/components/logo';
@@ -27,10 +27,10 @@ export function PetStatusBadge({ status }: { status: PetResponse['status'] }) {
   );
 }
 
-export function PetCard({ pet }: { pet: PetResponse }) {
+export function PetCard({ pet, href }: { pet: PetResponse; href?: Href }) {
   const cover = pet.photos[0];
   return (
-    <Link href={{ pathname: '/pets/[id]', params: { id: pet.id } }} asChild>
+    <Link href={href ?? { pathname: '/pets/[id]', params: { id: pet.id } }} asChild>
       <Pressable className="flex-row items-center gap-4 rounded-3xl bg-white p-3 active:opacity-80">
         <View className="size-20 items-center justify-center overflow-hidden rounded-2xl bg-brand-200">
           {cover ? (

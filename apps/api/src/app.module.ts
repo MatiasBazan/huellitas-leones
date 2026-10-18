@@ -13,6 +13,7 @@ import { CitiesModule } from './modules/cities/cities.module.js';
 import { HealthController } from './modules/health/health.controller.js';
 import { MediaModule } from './modules/media/media.module.js';
 import { PetsModule } from './modules/pets/pets.module.js';
+import { PostsModule } from './modules/posts/posts.module.js';
 import { StorageModule } from './modules/storage/storage.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
@@ -43,6 +44,7 @@ import { PrismaModule } from './prisma/prisma.module.js';
     CitiesModule,
     MediaModule,
     PetsModule,
+    PostsModule,
   ],
   controllers: [HealthController],
   providers: [
