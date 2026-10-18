@@ -11,10 +11,12 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "brand:assets": "node scripts/brand-assets.mjs"
   },
   "devDependencies": {
     "prettier": "^3.6.2",
+    "sharp": "0.35.5",
     "turbo": "^2.11.9",
     "typescript": "~6.0.3"
   }

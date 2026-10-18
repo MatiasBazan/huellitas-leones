@@ -1,6 +1,13 @@
 import '../global.css';
 
+// Imports por peso: el índice del paquete metería todas las variantes en el bundle
+import { Baloo2_700Bold } from '@expo-google-fonts/baloo-2/700Bold';
+import { Baloo2_800ExtraBold } from '@expo-google-fonts/baloo-2/800ExtraBold';
+import { NunitoSans_400Regular } from '@expo-google-fonts/nunito-sans/400Regular';
+import { NunitoSans_600SemiBold } from '@expo-google-fonts/nunito-sans/600SemiBold';
+import { NunitoSans_700Bold } from '@expo-google-fonts/nunito-sans/700Bold';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -17,16 +24,25 @@ const queryClient = new QueryClient({
 export default function RootLayout() {
   const status = useSession((s) => s.status);
   const profileIncomplete = useSession((s) => s.user?.profileIncomplete ?? false);
+  // Si una fuente falla, seguimos con la del sistema en vez de trabar el splash
+  const [fontsLoaded, fontError] = useFonts({
+    Baloo2_700Bold,
+    Baloo2_800ExtraBold,
+    NunitoSans_400Regular,
+    NunitoSans_600SemiBold,
+    NunitoSans_700Bold,
+  });
+  const ready = status !== 'loading' && (fontsLoaded || !!fontError);
 
   useEffect(() => {
     void bootstrapSession();
   }, []);
 
   useEffect(() => {
-    if (status !== 'loading') void SplashScreen.hideAsync();
-  }, [status]);
+    if (ready) void SplashScreen.hideAsync();
+  }, [ready]);
 
-  if (status === 'loading') return null;
+  if (!ready) return null;
 
   const signedIn = status === 'signedIn';
 

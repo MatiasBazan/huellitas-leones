@@ -14,14 +14,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   userInterfaceStyle: 'light',
   ios: {
     bundleIdentifier: 'com.mabdev.huellitaleones',
-    icon: './assets/expo.icon',
   },
   android: {
     package: 'com.mabdev.huellitaleones',
     adaptiveIcon: {
-      backgroundColor: '#FFF7ED',
+      backgroundColor: '#E8590C',
       foregroundImage: './assets/images/android-icon-foreground.png',
-      backgroundImage: './assets/images/android-icon-background.png',
       monochromeImage: './assets/images/android-icon-monochrome.png',
     },
     predictiveBackGestureEnabled: false,
@@ -35,9 +33,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#FFF7ED',
+        backgroundColor: '#FFF8EE',
         image: './assets/images/splash-icon.png',
-        imageWidth: 76,
+        imageWidth: 160,
       },
     ],
     'expo-secure-store',

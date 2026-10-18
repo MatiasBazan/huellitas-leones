@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
-import { Button, FormError, Screen, TextField } from '@/components/ui';
+import { View } from 'react-native';
+import { Button, FormError, Screen, Text, TextField } from '@/components/ui';
 import { errorMessage, fieldErrors } from '@/features/auth/errors';
 import { useRegister } from '@/features/auth/hooks';
 
@@ -16,7 +16,9 @@ export default function RegisterScreen() {
   return (
     <Screen>
       <View className="flex-1 justify-center gap-6">
-        <Text className="text-3xl font-bold text-ink">Crear cuenta</Text>
+        <Text variant="heading" className="text-3xl text-ink">
+          Crear cuenta
+        </Text>
         <View className="gap-4">
           <TextField
             label="Nombre"

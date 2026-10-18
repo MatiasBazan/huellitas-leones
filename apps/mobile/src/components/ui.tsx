@@ -5,12 +5,31 @@ import {
   Platform,
   Pressable,
   ScrollView,
-  Text,
+  Text as RNText,
   TextInput,
   View,
   type TextInputProps,
+  type TextProps,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { colors } from '@/theme';
+
+// Un solo font-* por texto: en React Native cada peso es una familia distinta
+const textVariants = {
+  body: 'font-body',
+  semibold: 'font-body-semibold',
+  bold: 'font-body-bold',
+  heading: 'font-heading',
+  headingBold: 'font-heading-bold',
+} as const;
+
+export function Text({
+  variant = 'body',
+  className = '',
+  ...props
+}: TextProps & { variant?: keyof typeof textVariants; className?: string }) {
+  return <RNText className={`${textVariants[variant]} ${className}`} {...props} />;
+}
 
 export function Screen({ children }: { children: ReactNode }) {
   return (
@@ -37,8 +56,8 @@ type ButtonProps = {
 
 const buttonStyles = {
   primary: { box: 'bg-brand-600', text: 'text-white' },
-  secondary: { box: 'bg-white border border-stone-300', text: 'text-ink' },
-  ghost: { box: 'bg-transparent', text: 'text-brand-700' },
+  secondary: { box: 'bg-white border-2 border-ink', text: 'text-ink' },
+  ghost: { box: 'bg-transparent', text: 'text-brand-600' },
 } as const;
 
 export function Button({ title, onPress, variant = 'primary', loading, disabled }: ButtonProps) {
@@ -52,9 +71,11 @@ export function Button({ title, onPress, variant = 'primary', loading, disabled 
       className={`h-12 flex-row items-center justify-center rounded-xl px-4 ${s.box} ${inactive ? 'opacity-60' : 'active:opacity-80'}`}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? '#fff' : '#C2410C'} />
+        <ActivityIndicator color={variant === 'primary' ? '#fff' : colors.brandStrong} />
       ) : (
-        <Text className={`text-base font-semibold ${s.text}`}>{title}</Text>
+        <Text variant="bold" className={`text-base ${s.text}`}>
+          {title}
+        </Text>
       )}
     </Pressable>
   );
@@ -65,13 +86,15 @@ type FieldProps = TextInputProps & { label: string; error?: string | undefined }
 export function TextField({ label, error, ...input }: FieldProps) {
   return (
     <View className="gap-1.5">
-      <Text className="text-sm font-medium text-ink">{label}</Text>
+      <Text variant="semibold" className="text-sm text-ink">
+        {label}
+      </Text>
       <TextInput
-        placeholderTextColor="#A8A29E"
-        className={`h-12 rounded-xl border bg-white px-4 text-base text-ink ${error ? 'border-red-500' : 'border-stone-300'}`}
+        placeholderTextColor={colors.placeholder}
+        className={`h-12 rounded-xl border bg-white px-4 font-body text-base text-ink ${error ? 'border-lost' : 'border-line'}`}
         {...input}
       />
-      {error ? <Text className="text-sm text-red-600">{error}</Text> : null}
+      {error ? <Text className="text-sm text-lost">{error}</Text> : null}
     </View>
   );
 }

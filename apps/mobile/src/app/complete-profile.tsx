@@ -1,8 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, View } from 'react-native';
 import { citiesApi } from '@/api/auth';
-import { Button, FormError, Screen, TextField } from '@/components/ui';
+import { Button, FormError, Screen, Text, TextField } from '@/components/ui';
 import { errorMessage, fieldErrors } from '@/features/auth/errors';
 import { useLogout, useUpdateMe } from '@/features/auth/hooks';
 import { useSession } from '@/stores/session';
@@ -26,14 +26,18 @@ export default function CompleteProfileScreen() {
     <Screen>
       <View className="flex-1 gap-6">
         <View className="gap-2">
-          <Text className="text-3xl font-bold text-ink">¡Hola, {user?.name}!</Text>
+          <Text variant="heading" className="text-3xl text-ink">
+            ¡Hola, {user?.name}!
+          </Text>
           <Text className="text-base text-ink-muted">
             Contanos tu barrio en {user?.city.name} para mostrarte lo que pasa cerca.
           </Text>
         </View>
 
         <View className="gap-2">
-          <Text className="text-sm font-medium text-ink">Barrio</Text>
+          <Text variant="semibold" className="text-sm text-ink">
+            Barrio
+          </Text>
           {neighborhoods.isLoading ? <ActivityIndicator /> : null}
           <View className="flex-row flex-wrap gap-2">
             {neighborhoods.data?.map((n) => {
@@ -42,9 +46,12 @@ export default function CompleteProfileScreen() {
                 <Pressable
                   key={n.id}
                   onPress={() => setNeighborhoodId(n.id)}
-                  className={`rounded-full border px-4 py-2 ${selected ? 'border-brand-600 bg-brand-600' : 'border-stone-300 bg-white'}`}
+                  className={`rounded-full border px-4 py-2 ${selected ? 'border-brand-600 bg-brand-600' : 'border-line bg-white'}`}
                 >
-                  <Text className={selected ? 'font-semibold text-white' : 'text-ink'}>
+                  <Text
+                    variant={selected ? 'semibold' : 'body'}
+                    className={selected ? 'text-white' : 'text-ink'}
+                  >
                     {n.name}
                   </Text>
                 </Pressable>
@@ -69,9 +76,7 @@ export default function CompleteProfileScreen() {
         </View>
 
         <FormError
-          message={
-            update.error && !Object.keys(errors).length ? errorMessage(update.error) : null
-          }
+          message={update.error && !Object.keys(errors).length ? errorMessage(update.error) : null}
         />
         <Button
           title="Listo"

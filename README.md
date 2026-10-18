@@ -2,19 +2,19 @@
 
 App solidaria de mascotas perdidas, encontradas y en adopción. Un proyecto de MAB DEV.
 
-| Paquete | Qué es |
-|---|---|
-| `apps/api` | NestJS 12 + Prisma 7 + PostgreSQL (puerto 3100, prefijo `/api/v1`) |
-| `apps/mobile` | Expo SDK 58 + Expo Router + NativeWind + TanStack Query + Zustand |
-| `apps/web` | Next.js 16 + Tailwind 4 + shadcn/ui (puerto 3101) |
-| `packages/shared` | Schemas Zod, enums y tipos compartidos |
-| `packages/config` | tsconfig base |
+| Paquete           | Qué es                                                             |
+| ----------------- | ------------------------------------------------------------------ |
+| `apps/api`        | NestJS 12 + Prisma 7 + PostgreSQL (puerto 3100, prefijo `/api/v1`) |
+| `apps/mobile`     | Expo SDK 58 + Expo Router + NativeWind + TanStack Query + Zustand  |
+| `apps/web`        | Next.js 16 + Tailwind 4 + shadcn/ui (puerto 3101)                  |
+| `packages/shared` | Schemas Zod, enums y tipos compartidos                             |
+| `packages/config` | tsconfig base                                                      |
 
 ## Requisitos
 
 - Node 24 y pnpm 12 (`corepack enable`)
 - PostgreSQL 18, nativo o con Docker (`docker compose -f docker/compose.dev.yml up -d`)
-- Android: celular con un *development build* (Google Sign-In no funciona en Expo Go)
+- Android: celular con un _development build_ (Google Sign-In no funciona en Expo Go)
 
 ## Setup
 
@@ -64,3 +64,10 @@ pnpm --filter @huellitas/api test:e2e       # e2e contra huellitas_test (se rese
 2. API: `GOOGLE_CLIENT_IDS=<web>,<android>` en `apps/api/.env`.
 3. Mobile: `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID=<web>` en `apps/mobile/.env`.
 4. Generar el development build: `pnpm --filter @huellitas/mobile android` (o `eas build --profile development`).
+
+## Marca
+
+Dirección "Melena": huella dentro de la melena de un león. Naranja `#E8590C`, melena `#F2A516`, tinta `#2B1A12`, crema `#FFF8EE`; botones `#B8400C`. Tipografías Baloo 2 (títulos) y Nunito Sans (texto).
+
+- SVG maestros en `assets/brand/`. Íconos, splash y favicons salen de `scripts/brand-assets.mjs`: si cambia el logo, se edita ahí y se corre `pnpm brand:assets`.
+- Tokens: `apps/web/src/app/globals.css` (shadcn) y `apps/mobile/tailwind.config.js` + `apps/mobile/src/theme.ts`.

@@ -1,15 +1,19 @@
-@import "tailwindcss";
-@import "tw-animate-css";
-@import "shadcn/tailwind.css";
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-sans: var(--font-nunito);
+  --font-heading: var(--font-baloo);
+  --color-brand: var(--brand);
+  --color-melena: var(--melena);
+  --color-lost: var(--lost);
+  --color-found: var(--found);
+  --color-adoption: var(--adoption);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -49,72 +53,83 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.646 0.194 41.1); /* naranja de marca (#EA580C) */
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Marca "Melena" — ver assets/brand y scripts/brand-assets.mjs */
+  --brand: #e8590c; /* naranja león: logo y gráficos (no para texto chico) */
+  --melena: #f2a516;
+  --lost: #b42318;
+  --found: #1d5fd1;
+  --adoption: #12795a;
+  --background: #fff8ee; /* crema */
+  --foreground: #2b1a12; /* tinta */
+  --card: #ffffff;
+  --card-foreground: #2b1a12;
+  --popover: #ffffff;
+  --popover-foreground: #2b1a12;
+  --primary: #b8400c; /* botones y texto de marca (AA con blanco) */
+  --primary-foreground: #ffffff;
+  --secondary: #fbebd8;
+  --secondary-foreground: #2b1a12;
+  --muted: #fbebd8;
+  --muted-foreground: #6b4a36;
+  --accent: #fbebd8;
+  --accent-foreground: #2b1a12;
+  --destructive: #b42318;
+  --border: #ebd9c3;
+  --input: #ebd9c3;
+  --ring: #e8590c;
+  --chart-1: #e8590c;
+  --chart-2: #f2a516;
+  --chart-3: #1d5fd1;
+  --chart-4: #12795a;
+  --chart-5: #6b4a36;
+  --radius: 0.875rem;
+  --sidebar: #fff3e3;
+  --sidebar-foreground: #2b1a12;
+  --sidebar-primary: #b8400c;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fbebd8;
+  --sidebar-accent-foreground: #2b1a12;
+  --sidebar-border: #ebd9c3;
+  --sidebar-ring: #e8590c;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.705 0.187 47.6);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --brand: #f07a35;
+  --melena: #f2a516;
+  --lost: #f0705f;
+  --found: #6d9cf0;
+  --adoption: #3fbf8f;
+  --background: #1a100b;
+  --foreground: #fff3e6;
+  --card: #2b1a12;
+  --card-foreground: #fff3e6;
+  --popover: #2b1a12;
+  --popover-foreground: #fff3e6;
+  --primary: #f28c4b;
+  --primary-foreground: #2b1a12;
+  --secondary: #3a2519;
+  --secondary-foreground: #fff3e6;
+  --muted: #3a2519;
+  --muted-foreground: #d9bfa8;
+  --accent: #3a2519;
+  --accent-foreground: #fff3e6;
+  --destructive: #f0705f;
+  --border: rgb(255 243 230 / 12%);
+  --input: rgb(255 243 230 / 16%);
+  --ring: #f07a35;
+  --chart-1: #f07a35;
+  --chart-2: #f2a516;
+  --chart-3: #6d9cf0;
+  --chart-4: #3fbf8f;
+  --chart-5: #d9bfa8;
+  --sidebar: #2b1a12;
+  --sidebar-foreground: #fff3e6;
+  --sidebar-primary: #f28c4b;
+  --sidebar-primary-foreground: #2b1a12;
+  --sidebar-accent: #3a2519;
+  --sidebar-accent-foreground: #fff3e6;
+  --sidebar-border: rgb(255 243 230 / 12%);
+  --sidebar-ring: #f07a35;
 }
 
 @layer base {
@@ -126,5 +141,10 @@
   }
   html {
     @apply font-sans;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-heading;
   }
 }

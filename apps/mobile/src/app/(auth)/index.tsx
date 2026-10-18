@@ -1,7 +1,8 @@
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { Text, View } from 'react-native';
-import { Button, FormError, Screen, TextField } from '@/components/ui';
+import { View } from 'react-native';
+import { Logo } from '@/components/logo';
+import { Button, FormError, Screen, Text, TextField } from '@/components/ui';
 import { errorMessage, fieldErrors } from '@/features/auth/errors';
 import { useGoogleLogin, useLogin } from '@/features/auth/hooks';
 
@@ -16,8 +17,8 @@ export default function LoginScreen() {
   return (
     <Screen>
       <View className="flex-1 justify-center gap-8">
-        <View className="gap-2">
-          <Text className="text-4xl font-bold text-brand-700">Huellita Leones</Text>
+        <View className="gap-4">
+          <Logo />
           <Text className="text-base text-ink-muted">
             Mascotas perdidas, encontradas y en adopción de tu ciudad.
           </Text>
@@ -56,8 +57,8 @@ export default function LoginScreen() {
         </View>
 
         <Link href="/register" asChild>
-          <Text className="text-center text-base text-brand-700">
-            ¿No tenés cuenta? <Text className="font-semibold">Registrate</Text>
+          <Text className="text-center text-base text-brand-600">
+            ¿No tenés cuenta? <Text variant="bold">Registrate</Text>
           </Text>
         </Link>
       </View>

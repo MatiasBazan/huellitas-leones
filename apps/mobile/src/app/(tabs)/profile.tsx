@@ -1,5 +1,5 @@
-import { Text, View } from 'react-native';
-import { Button } from '@/components/ui';
+import { View } from 'react-native';
+import { Button, Text } from '@/components/ui';
 import { useLogout } from '@/features/auth/hooks';
 import { useSession } from '@/stores/session';
 
@@ -17,12 +17,16 @@ export default function ProfileScreen() {
 
   return (
     <View className="flex-1 gap-6 bg-brand-50 px-6 py-8">
-      <Text className="text-3xl font-bold text-ink">{user.name}</Text>
+      <Text variant="heading" className="text-3xl text-ink">
+        {user.name}
+      </Text>
       <View className="gap-3 rounded-2xl bg-white p-4">
         {rows.map(([label, value]) => (
           <View key={label} className="flex-row justify-between gap-4">
             <Text className="text-ink-muted">{label}</Text>
-            <Text className="shrink text-right font-medium text-ink">{value}</Text>
+            <Text variant="semibold" className="shrink text-right text-ink">
+              {value}
+            </Text>
           </View>
         ))}
       </View>
