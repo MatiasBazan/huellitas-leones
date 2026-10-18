@@ -301,7 +301,7 @@ model AdoptionDetails {
 
 model Media {
   id         String      @id @default(uuid(7)) @db.Uuid
-  /// key del objeto en R2: cities/{citySlug}/{uuid}.webp
+  /// key del objeto en el bucket: cities/{cityId}/{uuid}.webp
   key        String      @unique
   mimeType   String
   sizeBytes  Int

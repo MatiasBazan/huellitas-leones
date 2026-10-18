@@ -107,3 +107,52 @@ export function FormError({ message }: { message: string | null }) {
     </View>
   );
 }
+
+type ChipsProps<T extends string> = {
+  label: string;
+  options: { value: T; label: string }[];
+  value: T | null;
+  onChange: (value: T | null) => void;
+  /** Permite deseleccionar tocando de nuevo */
+  optional?: boolean;
+  error?: string | undefined;
+};
+
+export function Chips<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+  optional,
+  error,
+}: ChipsProps<T>) {
+  return (
+    <View className="gap-1.5">
+      <Text variant="semibold" className="text-sm text-ink">
+        {label}
+      </Text>
+      <View className="flex-row flex-wrap gap-2">
+        {options.map((o) => {
+          const selected = o.value === value;
+          return (
+            <Pressable
+              key={o.value}
+              accessibilityRole="radio"
+              accessibilityState={{ selected }}
+              onPress={() => onChange(selected && optional ? null : o.value)}
+              className={`min-h-11 justify-center rounded-full border px-4 ${selected ? 'border-brand-600 bg-brand-600' : 'border-line bg-white'}`}
+            >
+              <Text
+                variant={selected ? 'semibold' : 'body'}
+                className={selected ? 'text-white' : 'text-ink'}
+              >
+                {o.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+      {error ? <Text className="text-sm text-lost">{error}</Text> : null}
+    </View>
+  );
+}

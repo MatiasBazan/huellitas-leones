@@ -22,6 +22,31 @@ export const envSchema = z.object({
   GOOGLE_CLIENT_IDS: csv,
   CORS_ORIGINS: csv,
   DEFAULT_CITY_SLUG: z.string().default(DEFAULT_CITY_SLUG),
+  /** local = disco de la máquina (desarrollo); r2 = Cloudflare R2 */
+  STORAGE_DRIVER: z.enum(['local', 'r2']).default('local'),
+  STORAGE_LOCAL_DIR: z.string().default('./storage'),
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_BUCKET: z.string().optional(),
+  /** Dominio público del bucket (custom domain o r2.dev), sin barra final */
+  R2_PUBLIC_BASE_URL: z.url().optional(),
+});
+
+const r2Keys = [
+  'R2_ACCOUNT_ID',
+  'R2_ACCESS_KEY_ID',
+  'R2_SECRET_ACCESS_KEY',
+  'R2_BUCKET',
+  'R2_PUBLIC_BASE_URL',
+] as const;
+
+const envWithStorageSchema = envSchema.superRefine((env, ctx) => {
+  if (env.STORAGE_DRIVER !== 'r2') return;
+  for (const key of r2Keys) {
+    if (!env[key])
+      ctx.addIssue({ code: 'custom', path: [key], message: 'Requerida con STORAGE_DRIVER=r2' });
+  }
 });
 
 export type Env = z.infer<typeof envSchema>;
@@ -29,7 +54,7 @@ export type Env = z.infer<typeof envSchema>;
 export const ENV = Symbol('ENV');
 
 export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
-  const result = envSchema.safeParse(source);
+  const result = envWithStorageSchema.safeParse(source);
   if (!result.success) {
     throw new Error(`Variables de entorno inválidas:\n${z.prettifyError(result.error)}`);
   }

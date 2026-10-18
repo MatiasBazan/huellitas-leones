@@ -18,3 +18,8 @@ export const config = {
   apiUrl: resolveApiUrl(),
   googleWebClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? '',
 } as const;
+
+/** Las URLs de fotos pueden venir relativas a la API (storage local de desarrollo) */
+export function mediaUrl(url: string): string {
+  return /^https?:\/\//.test(url) ? url : `${config.apiUrl}${url}`;
+}

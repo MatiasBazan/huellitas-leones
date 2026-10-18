@@ -14,8 +14,18 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { bootstrapSession } from '@/features/auth/bootstrap';
 import { useSession } from '@/stores/session';
+import { colors, fonts } from '@/theme';
 
 void SplashScreen.preventAutoHideAsync();
+
+const withHeader = {
+  headerShown: true,
+  headerStyle: { backgroundColor: colors.crema },
+  headerTintColor: colors.ink,
+  headerTitleStyle: { fontFamily: fonts.headingBold },
+  headerShadowVisible: false,
+  headerBackButtonDisplayMode: 'minimal',
+} as const;
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -58,6 +68,12 @@ export default function RootLayout() {
         </Stack.Protected>
         <Stack.Protected guard={signedIn && !profileIncomplete}>
           <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="pets/new" options={{ ...withHeader, title: 'Nueva mascota' }} />
+          <Stack.Screen name="pets/[id]/index" options={{ ...withHeader, title: '' }} />
+          <Stack.Screen
+            name="pets/[id]/edit"
+            options={{ ...withHeader, title: 'Editar mascota' }}
+          />
         </Stack.Protected>
       </Stack>
     </QueryClientProvider>

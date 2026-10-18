@@ -39,6 +39,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       },
     ],
     'expo-secure-store',
+    [
+      'expo-image-picker',
+      {
+        photosPermission: 'Necesitamos tus fotos para cargar las de tu mascota.',
+        cameraPermission: 'Necesitamos la cámara para sacarle fotos a tu mascota.',
+        microphonePermission: false,
+      },
+    ],
     googleIosUrlScheme
       ? ['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }]
       : '@react-native-google-signin/google-signin',

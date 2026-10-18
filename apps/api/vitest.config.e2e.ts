@@ -1,3 +1,5 @@
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { defineConfig } from 'vitest/config';
 
 try {
@@ -16,7 +18,13 @@ export default defineConfig({
     root: './',
     include: ['**/*.e2e-spec.ts'],
     globalSetup: ['./test/global-setup.ts'],
-    env: { NODE_ENV: 'test', DATABASE_URL: testDbUrl, GOOGLE_CLIENT_IDS: '' },
+    env: {
+      NODE_ENV: 'test',
+      DATABASE_URL: testDbUrl,
+      GOOGLE_CLIENT_IDS: '',
+      STORAGE_DRIVER: 'local',
+      STORAGE_LOCAL_DIR: join(tmpdir(), 'huellitas-e2e-storage'),
+    },
     fileParallelism: false,
   },
 });

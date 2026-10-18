@@ -1,5 +1,5 @@
 import type { AuthResponse, MeResponse } from '@huellitas/shared';
-import * as SecureStore from 'expo-secure-store';
+import { secureStorage } from '@/lib/secure-storage';
 import { create } from 'zustand';
 
 const REFRESH_KEY = 'huellitas.refreshToken';
@@ -23,17 +23,17 @@ export const useSession = create<SessionState>((set) => ({
   refreshToken: null,
   user: null,
 
-  loadStoredRefresh: () => SecureStore.getItemAsync(REFRESH_KEY),
+  loadStoredRefresh: () => secureStorage.get(REFRESH_KEY),
 
   setSession: async ({ accessToken, refreshToken, user }) => {
-    await SecureStore.setItemAsync(REFRESH_KEY, refreshToken);
+    await secureStorage.set(REFRESH_KEY, refreshToken);
     set({ status: 'signedIn', accessToken, refreshToken, user });
   },
 
   setUser: (user) => set({ user }),
 
   clear: async () => {
-    await SecureStore.deleteItemAsync(REFRESH_KEY);
+    await secureStorage.remove(REFRESH_KEY);
     set({ status: 'signedOut', accessToken: null, refreshToken: null, user: null });
   },
 }));

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { JwtAuthGuard } from './common/jwt-auth.guard.js';
 import { PrismaExceptionFilter } from './common/prisma-exception.filter.js';
@@ -10,6 +11,9 @@ import { ENV, type Env } from './config/env.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { CitiesModule } from './modules/cities/cities.module.js';
 import { HealthController } from './modules/health/health.controller.js';
+import { MediaModule } from './modules/media/media.module.js';
+import { PetsModule } from './modules/pets/pets.module.js';
+import { StorageModule } from './modules/storage/storage.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 
@@ -32,9 +36,13 @@ import { PrismaModule } from './prisma/prisma.module.js';
         skipIf: () => env.NODE_ENV === 'test',
       }),
     }),
+    ScheduleModule.forRoot(),
+    StorageModule,
     AuthModule,
     UsersModule,
     CitiesModule,
+    MediaModule,
+    PetsModule,
   ],
   controllers: [HealthController],
   providers: [

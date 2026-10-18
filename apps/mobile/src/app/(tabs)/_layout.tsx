@@ -24,7 +24,8 @@ export default function TabsLayout() {
         headerStyle: { backgroundColor: colors.crema },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: tabIcon('paw') }} />
+      <Tabs.Screen name="index" options={{ title: 'Inicio', tabBarIcon: tabIcon('home') }} />
+      <Tabs.Screen name="pets" options={{ title: 'Mis mascotas', tabBarIcon: tabIcon('paw') }} />
       <Tabs.Screen name="profile" options={{ title: 'Perfil', tabBarIcon: tabIcon('person') }} />
     </Tabs>
   );

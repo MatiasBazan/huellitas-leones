@@ -9,6 +9,18 @@ export const LIMITS = {
   DESCRIPTION_MAX: 2000,
   FEED_PAGE_SIZE: 20,
   FEED_PAGE_SIZE_MAX: 50,
+  PET_NAME_MAX: 40,
+  PET_TEXT_MAX: 60,
+  PET_MARKS_MAX: 500,
+} as const;
+
+export const MEDIA = {
+  /** La app comprime antes de subir: lado mayor 1600px en WebP (también le saca el EXIF con GPS) */
+  IMAGE_MAX_SIDE: 1600,
+  MAX_UPLOAD_BYTES: 5 * 1024 * 1024,
+  ALLOWED_TYPES: ['image/webp', 'image/jpeg', 'image/png'],
+  /** Vida de la URL firmada para subir */
+  UPLOAD_URL_TTL_SECONDS: 600,
 } as const;
 
 /** Código de país + área para normalizar WhatsApp argentino (E.164 móvil: +549...) */
